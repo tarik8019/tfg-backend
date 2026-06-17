@@ -53,7 +53,7 @@ namespace ApiRest.Controllers
             return Ok(_mapper.Map<UserDto>(user));
         }
 
-       
+
 
 
         //[AllowAnonymous]
@@ -83,47 +83,60 @@ namespace ApiRest.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Login(UserLoginDto userLoginDto)
+        public async Task<IActionResult> Login([FromBody] UserLoginDto userLoginDto)
         {
-            // Llamada al repositorio para autenticar
-            var responseLogin = await _userRepository.Login(userLoginDto);
-
-            //  Verificar si hubo error de login
-            if (responseLogin.Nombre == null || string.IsNullOrEmpty(responseLogin.Token))
+            try
             {
-                _reponseApi.StatusCode = HttpStatusCode.BadRequest;
-                _reponseApi.IsSuccess = false;
-                _reponseApi.ErrorMessages.Add("Incorrect user and password");
-                return BadRequest(_reponseApi);
+                if (userLoginDto == null)
+                {
+                    return BadRequest("Datos de login no válidos");
+                }
+
+                var responseLogin = await _userRepository.Login(userLoginDto);
+
+                if (responseLogin == null ||
+                    string.IsNullOrEmpty(responseLogin.Token) ||
+                    string.IsNullOrEmpty(responseLogin.Nombre))
+                {
+                    return Unauthorized(new
+                    {
+                        isSuccess = false,
+                        message = "Usuario o contraseña incorrectos"
+                    });
+                }
+
+                var responseDto = new UserLoginResponseDto
+                {
+                    Id = responseLogin.Id,
+                    Nombre = responseLogin.Nombre,
+                    Apellidos = responseLogin.Apellidos,
+                    Email = responseLogin.Email,
+                    Rol = responseLogin.Rol,
+                    Token = responseLogin.Token,
+                    IsActivo = responseLogin.IsActivo,
+                    PictureUrl = responseLogin.PictureUrl,
+                    IdEmpresa = responseLogin.IdEmpresa,
+                };
+
+                return Ok(new
+                {
+                    statusCode = HttpStatusCode.OK,
+                    isSuccess = true,
+                    result = responseDto
+                });
             }
-
-            //  Obtener UsuarioEntity relacionado para extraer el rol
-            var usuarioEntity = await _userRepository.GetUsuarioAsync(responseLogin.Id);
-
-
-            //  Crear DTO de respuesta
-            var responseDto = new UserLoginResponseDto
-            {    
-                Id = responseLogin.Id,
-                Nombre = responseLogin.Nombre,
-                Apellidos = responseLogin.Apellidos,
-                Email = responseLogin.Email,
-                Rol = responseLogin.Rol,
-                Token = responseLogin.Token,
-                IsActivo = responseLogin.IsActivo,
-                PictureUrl = responseLogin.PictureUrl,
-                IdEmpresa = responseLogin.IdEmpresa,
-            };
-
-            //  Devolver la respuesta usando la misma estructura
-            _reponseApi.StatusCode = HttpStatusCode.OK;
-            _reponseApi.IsSuccess = true;
-            _reponseApi.Result = responseDto;
-
-            return Ok(_reponseApi);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    isSuccess = false,
+                    message = "Error interno en el servidor",
+                    detail = ex.Message
+                });
+            }
         }
 
 

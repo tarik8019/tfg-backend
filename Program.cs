@@ -80,7 +80,7 @@ builder.Services.AddAuthentication(auth =>
     auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(x =>
 {
-    x.RequireHttpsMetadata = false;
+    x.RequireHttpsMetadata = true;
     x.SaveToken = true;
     x.TokenValidationParameters = new TokenValidationParameters
     {
@@ -150,13 +150,13 @@ builder.Services.AddCors(p => p.AddPolicy("CorsPolicy", build =>
 }));
 
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Listen(System.Net.IPAddress.Loopback, 5072, listenOptions =>
-    {
-        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
-    });
-});
+//builder.WebHost.ConfigureKestrel(options =>
+//{
+    //options.Listen(System.Net.IPAddress.Loopback, 5072, listenOptions =>
+    //{
+        //listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http1;
+    //});
+//});
 
 
 
@@ -181,11 +181,11 @@ using (var scope = app.Services.CreateScope())
     await seeder.SeedAsync();
 }
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+//}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -197,6 +197,112 @@ app.UseAuthorization();
 app.MapControllers();
 app.Run();
 
+// Ve a Herramientas > Administrador de paquetes NuGet > Consola del Administrador de paquetes.
+// Add-Migration InitialCreate
+// Update-Database
 
+// dotnet ef migrations add InitialCreate
+// dotnet ef database update 
+
+//dotnet ef migrations remove 
+//dotnet tool install 
+// dotnet clean
+// dotnet build
+
+
+
+
+
+/*
+//Create Container
+docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=jS7R4qwUYx9e6uM5k8Zhfv' -e "MSSQL_PID=Developer"
+  -p 1400:1433 
+  --name SQL_Server_DI
+  -v SQL_Server_Volume:/var/opt/mssql
+  -d mcr.microsoft.com/mssql/server:2022-latest
+
+
+//Create User
+-- Step 1: Create a SQL Login
+CREATE LOGIN api_user
+WITH PASSWORD = 'jS7R4qwUYx9e6uM5k8Zhfv'; -- Replace with a strong password
+
+CREATE USER api_user
+FOR LOGIN api_user;
+
+-- Step 2: Create a Database User for MovieAPI
+USE Basic;
+
+CREATE USER AppUser
+FOR LOGIN api_user;
+
+-- Step 3: Grant CRUD permissions to the user
+-- Grant permissions on the schema or specific tables
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO AppUser;
+
+-- Alternatively, grant db_datawriter and db_datareader roles
+-- db_datareader: Can read all data in the database
+-- db_datawriter: Can write to all data in the database
+EXEC sp_addrolemember 'db_datareader', 'api_user';
+EXEC sp_addrolemember 'db_datawriter', 'api_user';
+
+-- Step 4: Grant ALTER and CREATE permissions for handling migrations
+GRANT ALTER ON SCHEMA::dbo TO AppUser; -- For altering existing objects
+GRANT REFERENCES ON SCHEMA::dbo TO AppUser;
+GRANT CREATE TABLE TO api_user;        -- For creating new tables
+GRANT CREATE PROCEDURE TO api_user;    -- For creating stored procedures
+GRANT CREATE VIEW TO api_user;         -- For creating views
+
+-- Step 5: Optionally grant execution permission if needed
+GRANT EXECUTE ON SCHEMA::dbo TO api_user;
+
+*/
+
+// Rafa version
+/*
+//Create Container
+docker run -e 'ACCEPT_EULA=Y' -e 'MSSQL_SA_PASSWORD=wnD/LbJq?X39t,}-628%)' -e "MSSQL_PID=Developer"
+  -p 1433:1433 
+  --name SQL_Server_DI
+  -v SQL_Server_Volume:/var/opt/mssql
+  -d mcr.microsoft.com/mssql/server:2022-latest
+
+
+//Create User
+-- Step 1: Create a SQL Login
+CREATE LOGIN AppUserLogin
+WITH PASSWORD = 'e.d_fwm2()~37hz?+LBT4V'; -- Replace with a strong password
+
+CREATE USER AppUser
+FOR LOGIN AppUserLogin;
+
+-- Step 2: Create a Database User for MovieAPI
+CREATE DATABASE Basic;
+USE Basic;
+
+CREATE USER AppUser
+FOR LOGIN AppUserLogin;
+
+-- Step 3: Grant CRUD permissions to the user
+-- Grant permissions on the schema or specific tables
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO AppUser;
+
+-- Alternatively, grant db_datawriter and db_datareader roles
+-- db_datareader: Can read all data in the database
+-- db_datawriter: Can write to all data in the database
+EXEC sp_addrolemember 'db_datareader', 'AppUser';
+EXEC sp_addrolemember 'db_datawriter', 'AppUser';
+
+-- Step 4: Grant ALTER and CREATE permissions for handling migrations
+GRANT ALTER ON SCHEMA::dbo TO AppUser; -- For altering existing objects
+GRANT REFERENCES ON SCHEMA::dbo TO AppUser;
+GRANT CREATE TABLE TO AppUser;        -- For creating new tables
+GRANT CREATE PROCEDURE TO AppUser;    -- For creating stored procedures
+GRANT CREATE VIEW TO AppUser;         -- For creating views
+
+-- Step 5: Optionally grant execution permission if needed
+GRANT EXECUTE ON SCHEMA::dbo TO AppUser;
+
+*/
 
 
