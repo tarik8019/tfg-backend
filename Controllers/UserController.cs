@@ -3,6 +3,7 @@ using ApiRest.Models.DTOs.UserDTOs;
 using ApiRest.Repository.IRepository;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
@@ -139,6 +140,22 @@ namespace ApiRest.Controllers
             }
         }
 
+
+        [AllowAnonymous]
+        [HttpGet("generar-token-activacion")]
+        public async Task<IActionResult> GenerarTokenActivacion(string email)
+        {
+            var token = await _userRepository.GenerarTokenActivacionAsync(email);
+
+            if (token == null)
+                return NotFound("Usuario no encontrado");
+
+            return Ok(new
+            {
+                email,
+                token
+            });
+        }
 
     }
 }

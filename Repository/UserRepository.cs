@@ -217,6 +217,18 @@ namespace ApiRest.Repository
                 .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
+        public async Task<string?> GenerarTokenActivacionAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return null;
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            return Uri.EscapeDataString(token);
+        }
+
     }
 }
 

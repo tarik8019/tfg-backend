@@ -1,5 +1,6 @@
 ﻿using ApiRest.Models.DTOs.UserDTOs;
 using ApiRest.Models.Entity;
+using Microsoft.AspNetCore.Identity;
 
 namespace ApiRest.Repository.IRepository
 {
@@ -18,7 +19,7 @@ namespace ApiRest.Repository.IRepository
 
         Task<UsuarioEntity?> GetUsuarioByEmailAsync(string email);
 
-
+        Task<string?> GenerarTokenActivacionAsync(string email);
 
     }
 }
