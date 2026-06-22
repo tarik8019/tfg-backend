@@ -104,8 +104,10 @@ namespace ApiRest.Controllers
                 {
                     return Unauthorized(new
                     {
+                        statusCode = HttpStatusCode.Unauthorized,
                         isSuccess = false,
-                        message = "Usuario o contraseña incorrectos"
+                        errorMessages = new List<string> { "Usuario o contraseña incorrectos" },
+                        result = (object?)null
                     });
                 }
 
@@ -126,6 +128,7 @@ namespace ApiRest.Controllers
                 {
                     statusCode = HttpStatusCode.OK,
                     isSuccess = true,
+                    errorMessages = new List<string>(),
                     result = responseDto
                 });
             }
